@@ -18,9 +18,8 @@ class GuiStub:
         self.running = True
 
     def connect_to_backend(self):
-        time.sleep(3)
         self.sock.connect((self.host, self.port))
-        logging.debug("connected to backend")
+        logging.debug("connected to Com")
         self.listener.start()
 
     def listen(self):
@@ -43,7 +42,6 @@ class GuiStub:
         self.sock.close()
         logging.debug("gui closed")
 
-
     def close_connection(self):
         self.sock.send(GuiRequests.build_pack_type(GuiRequests.CLOSE_CONN))
 
@@ -51,19 +49,14 @@ class GuiStub:
         self.sock.send(GuiRequests.build_download_model_msg(url))
         logging.debug("I sent download model msg")
 
-    def init_core(self, out_path, num_sessions, session_duration, ask_freq,
-                  use_camera, use_mouse, use_kb, use_metadata):
-        self.sock.send(GuiRequests.build_init_core_msg(out_path, num_sessions,
-                                                       session_duration, ask_freq,
-                                                       use_camera, use_mouse, use_kb, use_metadata))
-
-    def run_core(self):
-        self.sock.send(GuiRequests.build_pack_type(GuiRequests.RUN_CORE))
+    def run_core(self, out_path, num_sessions, session_duration, ask_freq,
+                 use_camera, use_mouse, use_kb, use_metadata):
+        self.sock.send(GuiRequests.build_run_core_msg(out_path, num_sessions,
+                                                      session_duration, ask_freq,
+                                                      use_camera, use_mouse, use_kb, use_metadata))
 
     def stop_core(self):
         self.sock.send(GuiRequests.build_pack_type(GuiRequests.STOP_CORE))
 
     def get_label(self, label):
         self.sock.send(GuiRequests.build_get_label_msg(label))
-
-

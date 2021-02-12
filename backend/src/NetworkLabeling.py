@@ -3,12 +3,12 @@ import GuiRequests
 from oratio.labeling.labeling_method.LabelMethod import LabelMethod
 
 
-class GuiLabeling(LabelMethod):
+class NetworkLabeling(LabelMethod):
 
-    def __init__(self, gui_sock):
+    def __init__(self, request_label):
         super().__init__()
         self.name = "GUI"
-        self.gui_sock = gui_sock
+        self.request_label = request_label
         self.pending_for_label = False
 
     def set_label(self, label):
@@ -16,8 +16,8 @@ class GuiLabeling(LabelMethod):
         self.pending_for_label = False
 
     def get_label(self):
-        self.gui_sock.send(GuiRequests.build_pack_type(GuiRequests.REQUEST_LABEL))
         self.pending_for_label = True
+        self.request_label()
         while self.pending_for_label:
             time.sleep(0.001)
         self.pending_for_label = False

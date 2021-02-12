@@ -3,62 +3,58 @@ import time
 import shutil
 import pathlib
 import unittest
-from threading import Thread
+import GuiRequests
 from src.Backend import Backend
-from tests.GuiStub import GuiStub
+from src.NetworkLabeling import NetworkLabeling
 
 
 class BackendTest(unittest.TestCase):
 
     def setUp(self):
-        self.gui_stub = GuiStub()
-        Thread(target=self.gui_stub.connect_to_backend).start()
-
         self.test_path = str(pathlib.Path(__file__).parent.absolute())
         self.res_path = os.path.join(self.test_path, 'resources')
         self.output_path = os.path.join(self.test_path, 'output')
+        self.log_path = self.output_path
 
-        self.backend = Backend(resources_path=self.res_path)
+        self.backend = Backend(self.output_path, self.res_path, self.log_path)
 
     def tearDown(self):
-        self.backend.close_backend()
-        self.gui_stub.close_gui()
+        self.backend.stop_core()
 
         # shutil.rmtree(self.res_path, ignore_errors=True)
         shutil.rmtree(self.output_path, ignore_errors=True)
 
-    def test_empty_run(self):
-        time.sleep(5)
+    def __request_label(self):
+        time.sleep(2)  # waiting for label
+        self.backend.set_label({"label": 0})
+
+    def test_set_label(self):
+        self.backend.run_core(self.__request_label, num_sessions=10, session_duration=1, ask_freq=5,
+                              use_camera=True, use_mouse=True, use_kb=True, use_metadata=True)
+        label = {"label": 0}
+        self.backend.set_label(label)
+        self.assertEqual(self.backend.labeler.label, label)
 
     def test_download_face_model(self):
         self.assertFalse(os.path.isfile(os.path.join(self.res_path, 'face_detection.dat')))
-        self.gui_stub.download_face_model()
-        time.sleep(15)
+        self.backend.download_face_model(GuiRequests.DLIB_FACE_MODEL_URL)
         self.assertTrue(os.path.isfile(os.path.join(self.res_path, 'face_detection.dat')))
 
-    def test_init_core(self):
-        self.assertFalse(os.path.isdir(self.output_path))
-        self.assertFalse(os.path.isfile(os.path.join(self.output_path, 'capi_client.db')))
-        self.gui_stub.init_core(out_path=self.test_path, num_sessions=10, session_duration=1, ask_freq=5,
-                                use_camera=True, use_mouse=True, use_kb=True, use_metadata=True)
-        time.sleep(10)
-        self.assertTrue(os.path.isdir(self.output_path))
-        self.assertTrue(os.path.isfile(os.path.join(self.output_path, 'capi_client.db')))
-
     def test_run_core(self):
-        pass
+        self.backend.run_core(self.__request_label, num_sessions=10, session_duration=1, ask_freq=5,
+                              use_camera=True, use_mouse=True, use_kb=True, use_metadata=True)  # suppose to be ok
+        self.assertTrue(self.backend.core.running)
+        self.assertTrue(self.backend.core_thread is not None)
+        self.assertTrue(self.backend.core_thread.is_alive())
+        time.sleep(10)
 
     def test_stop_core(self):
-        pass
-
-    def test_get_label(self):
-        pass
-
-    def test_request_label(self):
-        pass
-
-    def test_close_connection(self):
-        self.gui_stub.close_connection()
+        self.backend.run_core(self.__request_label, num_sessions=10, session_duration=1, ask_freq=5,
+                              use_camera=True, use_mouse=True, use_kb=True, use_metadata=True)  # suppose to be ok
+        time.sleep(1)
+        self.backend.stop_core()
+        self.assertFalse(self.backend.core.running)
+        self.assertTrue(self.backend.core_thread is None)
 
 
 if __name__ == '__main__':

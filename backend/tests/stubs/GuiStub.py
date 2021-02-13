@@ -33,7 +33,7 @@ class GuiStub:
             if request["type"] == GuiRequests.REQUEST_LABEL:
                 time.sleep(2)
                 label = {"categorical": 5, "VAD": {"Valance": 2, "Arousal": -3, "Dominance": 4}}
-                self.sock.send(GuiRequests.build_get_label_msg(label))
+                self.send_label(label)
 
     def close_gui(self):
         logging.debug("closing gui")
@@ -49,6 +49,10 @@ class GuiStub:
         self.sock.send(GuiRequests.build_download_model_msg(url))
         logging.debug("I sent download model msg")
 
+    def download_task_keywords(self, url=GuiRequests.TASK_KEYWORDS_URL):
+        self.sock.send(GuiRequests.build_download_task_keywords_msg(url))
+        logging.debug("I sent download model msg")
+
     def run_core(self, out_path, num_sessions, session_duration, ask_freq,
                  use_camera, use_mouse, use_kb, use_metadata):
         self.sock.send(GuiRequests.build_run_core_msg(out_path, num_sessions,
@@ -58,5 +62,5 @@ class GuiStub:
     def stop_core(self):
         self.sock.send(GuiRequests.build_pack_type(GuiRequests.STOP_CORE))
 
-    def get_label(self, label):
-        self.sock.send(GuiRequests.build_get_label_msg(label))
+    def send_label(self, label):
+        self.sock.send(GuiRequests.build_label_msg(label))

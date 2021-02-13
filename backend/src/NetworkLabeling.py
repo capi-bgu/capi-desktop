@@ -21,4 +21,5 @@ class NetworkLabeling(LabelMethod):
         while self.pending_for_label:
             time.sleep(0.001)
         self.pending_for_label = False
-        return super().get_label()
+        # return super().get_label()
+        return self.label

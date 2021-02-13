@@ -1,9 +1,7 @@
 import os
 import logging
-import pathlib
 import requests
 import warnings
-from src.Com import Com
 from threading import Thread
 from oratio.Core import Core
 from src.AbsBackend import AbsBackend
@@ -30,11 +28,16 @@ class Backend(AbsBackend):
 
     def __init__(self, out_path="", resources_path="", log_path=""):
         super().__init__(out_path, resources_path, log_path)
-        # self.labeler = NetworkLabeling(self.com.request_label)
 
     def download_face_model(self, url):
-        logging.debug('downloading face model....')
-        model_file_path = os.path.join(self.resources_path, "face_detection.dat")
+        self.__download_from_url(url, "face_detection.dat")
+
+    def download_task_keywords(self, url):
+        self.__download_from_url(url, "task_keywords.json")
+
+    def __download_from_url(self, url, file_name):
+        logging.debug(f'downloading {file_name}....')
+        model_file_path = os.path.join(self.resources_path, file_name)
         if not os.path.isfile(model_file_path):
             with open(model_file_path, 'wb') as f:
                 model_data = requests.get(url).content
@@ -43,8 +46,7 @@ class Backend(AbsBackend):
 
     def run_core(self, request_label_func, num_sessions=0, session_duration=1, ask_freq=1,
                  use_camera=True, use_mouse=True, use_kb=True, use_metadata=True):
-        if self.core is not None and self.core.running and \
-                self.core_thread is not None and self.core_thread.is_alive():
+        if self.core_running():
             logging.warning("Can't run a working core")
             warnings.warn("Can't run a working core")
             return
@@ -90,17 +92,21 @@ class Backend(AbsBackend):
         self.core_thread = Thread(target=self.core.run)
         self.core_thread.start()
 
-    def set_label(self, label):
-        self.labeler.set_label(label)
-
     def stop_core(self):
         if self.core is None:
             logging.warning("In order to stop core you must first initialize core")
             warnings.warn("In order to stop core you must first initialize core")
-        elif not self.core.running or self.core_thread is None or not self.core_thread.is_alive():
+        elif not self.core_running():
             logging.warning("Can't stop non-running core")
             warnings.warn("Can't stop non-running core")
         else:
             self.core.stop()
             self.core_thread.join()
             self.core_thread = None
+
+    def set_label(self, label):
+        self.labeler.set_label(label)
+
+    def core_running(self):
+        return self.core is not None and self.core.running and \
+               self.core_thread is not None and self.core_thread.is_alive()

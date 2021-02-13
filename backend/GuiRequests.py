@@ -2,13 +2,17 @@ import json
 
 
 DLIB_FACE_MODEL_URL = "https://drive.google.com/uc?export=download&id=1AilalzxfrUbFYxK-CbN5AGzZntQ5y9mR"
+TASK_KEYWORDS_URL = "https://drive.google.com/uc?id=1gEXK7X-QyW56MUZ8LUAZ9wf6jPBGVuaH&export=download"
 
-CLOSE_CONN = "close_connection"
-DOWNLOAD_MODEL = "download_face_model"
-RUN_CORE = "run_core"
-STOP_CORE = "stop_core"
-GET_LABEL = "get_label"
-REQUEST_LABEL = "request_label"
+
+CLOSE_CONN = "close-connection"
+DOWNLOAD_FACE_MODEL = "download-face-model"
+DOWNLOAD_TASK_KEYWORDS = "download-task-keywords"
+RUN_CORE = "run-core"
+STOP_CORE = "stop-core"
+LABEL = "label"
+REQUEST_LABEL = "request-label"
+UNKNOWN = "unknown"
 
 
 def get_msg_from_type(msg):
@@ -16,7 +20,13 @@ def get_msg_from_type(msg):
 
 
 def build_download_model_msg(url=DLIB_FACE_MODEL_URL):
-    msg = get_msg_from_type(DOWNLOAD_MODEL)
+    msg = get_msg_from_type(DOWNLOAD_FACE_MODEL)
+    msg["url"] = url
+    return build_pack(msg)
+
+
+def build_download_task_keywords_msg(url=TASK_KEYWORDS_URL):
+    msg = get_msg_from_type(DOWNLOAD_TASK_KEYWORDS)
     msg["url"] = url
     return build_pack(msg)
 
@@ -35,8 +45,8 @@ def build_run_core_msg(out_path="", num_sessions=0, session_duration=1, ask_freq
     return build_pack(msg)
 
 
-def build_get_label_msg(label):
-    msg = get_msg_from_type(GET_LABEL)
+def build_label_msg(label):
+    msg = get_msg_from_type(LABEL)
     msg["label"] = label
     return build_pack(msg)
 
@@ -52,4 +62,8 @@ def build_pack_type(msg):
 
 def read_msg(msg):
     msg = msg.decode('utf-8')
-    return json.loads(msg)
+    try:
+        msg = json.loads(msg)
+    except json.decoder.JSONDecodeError:
+        msg = {"type": "unknown"}
+    return msg

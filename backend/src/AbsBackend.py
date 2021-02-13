@@ -28,7 +28,7 @@ class AbsBackend(ABC):
 
         if out_path == "":
             out_path = self.curr_dir
-        self.out_path = os.path.join(out_path, 'output')
+        self.out_path = out_path
         if not os.path.isdir(self.out_path):
             os.mkdir(self.out_path)
 
@@ -41,7 +41,7 @@ class AbsBackend(ABC):
         pass
 
     @abstractmethod
-    def set_label(self, label):
+    def download_task_keywords(self, url):
         pass
 
     @abstractmethod
@@ -51,4 +51,12 @@ class AbsBackend(ABC):
 
     @abstractmethod
     def stop_core(self):
+        pass
+
+    @abstractmethod
+    def set_label(self, label):
+        pass
+
+    @abstractmethod
+    def core_running(self):
         pass

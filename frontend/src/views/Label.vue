@@ -1,10 +1,10 @@
 <template>
   <div class="px-16 flex flex-col">
     <Card class="my-8" :title="'Mood'">
-      <Range :values="mood" />
+      <Range :values="mood" @selected="select_mood" />
     </Card>
     <Card class="my-8" :title="'Valance'">
-      <Range :values="valance" />
+      <Range :values="valance" @selected="select_valance" />
       <div class="help">
         <div @click="help_show.valance = !help_show.valance">
           <i class="far fa-question-circle help-icon" />
@@ -23,7 +23,7 @@
       </div>
     </Card>
     <Card class="my-8" :title="'Arousal'">
-      <Range :values="arousal" />
+      <Range :values="arousal" @selected="select_arousal"/>
       <div class="help">
         <div @click="help_show.arousal = !help_show.arousal">
           <i class="far fa-question-circle help-icon" />
@@ -42,7 +42,7 @@
       </div>
     </Card>
     <Card class="my-8" :title="'Dominance'">
-      <Range :values="dominance" />
+      <Range :values="dominance" @selected="select_dominance" />
       <div class="help">
         <div @click="help_show.dominance = !help_show.dominance">
           <i class="far fa-question-circle help-icon" />
@@ -61,7 +61,7 @@
       </div>
     </Card>
     <div class="flex flex-row justify-center">
-      <button
+      <button @click="submit"
         class="bg-gradient-to-tr from-green-400 to-green-500 hover:to-green-400 rounded-lg text-white text-2xl font-bold px-8 py-2"
       >
         Submit
@@ -82,6 +82,12 @@ export default {
   },
   data() {
     return {
+      selected: {
+        mood: "happiness",
+        valance: 0,
+        arousal: 0,
+        dominance: 0
+      },
       help_show: {
         valance: false,
         arousal: false,
@@ -91,7 +97,7 @@ export default {
         { value: "happiness", emoji: "😄" },
         { value: "disgust", emoji: "🤢" },
         { value: "fear", emoji: "😨" },
-        { value: "saddness", emoji: "😔" },
+        { value: "sadness", emoji: "😔" },
         { value: "anger", emoji: "😠" }
       ],
       valance: [
@@ -146,6 +152,30 @@ export default {
         { value: 8, icon: ["fas", "fa-user", "text-5xl", "text-purple-700"] }
       ]
     };
+  },
+  methods: {
+    submit: function() {
+      this.$root.events.label({
+        categorical: this.selected.mood,
+        VAD: {
+          valance: this.selected.valance,
+          arousal: this.selected.arousal,
+          dominance: this.selected.dominance
+        }
+      });
+    },
+    select_mood: function(mood) {
+      this.selected.mood = mood;
+    },
+    select_valance: function(valance) {
+      this.selected.valance = valance;
+    },
+    select_arousal: function(arousal) {
+      this.selected.arousal = arousal;
+    },
+    select_dominance: function(dominance) {
+      this.selected.dominance = dominance;
+    }
   }
 };
 </script>

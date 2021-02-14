@@ -50,9 +50,9 @@
           <input
             class="s-number s-focus"
             type="number"
-            id="num_sessions"
             min="1"
-            :v-model="$root.store.settings.num_sessions"
+            id="num_sessions"
+            v-model.number="$root.store.settings.num_sessions"
           />
         </div>
         <div class="s-number-group">
@@ -60,9 +60,9 @@
           <input
             class="s-number s-focus"
             type="number"
-            id="session_duration"
             min="1"
-            :v-model="$root.store.settings.session_duration"
+            id="session_duration"
+            v-model.number="$root.store.settings.session_duration"
           />
         </div>
         <div class="s-number-group">
@@ -70,9 +70,9 @@
           <input
             class="s-number s-focus"
             type="number"
-            id="labeling_freq"
             min="1"
-            :v-model="$root.store.settings.label_frequency"
+            id="labeling_freq"
+            v-model.number="$root.store.settings.label_frequency"
           />
         </div>
       </Card>

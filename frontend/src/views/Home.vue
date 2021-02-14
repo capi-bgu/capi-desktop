@@ -12,7 +12,7 @@
       </Card>
 
       <Card :title="'CPU Usage'" class="col-span-2">
-        <h1>20%</h1>
+        <h1>{{ $root.store.cpu }}</h1>
       </Card>
 
       <Card :title="'RAM Usage'" class="col-start-1 col-span-2">
@@ -20,11 +20,11 @@
       </Card>
 
       <Card :title="'Mood'" class="col-span-2">
-        <h1>Happy</h1>
+        <h1>{{ $root.store.mood }}</h1>
       </Card>
 
       <Card :title="'Disk Space'" class="col-span-2">
-        <h1>2GB</h1>
+        <h1>{{ $root.store.disk }}</h1>
       </Card>
     </main>
   </div>

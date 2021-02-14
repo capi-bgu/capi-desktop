@@ -3,31 +3,14 @@
 import { app, protocol, BrowserWindow, ipcMain } from "electron";
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
 import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
+import { updateStats } from "./background/systemStats";
+import { initEventHandlers } from "./background/eventHandler";
 const isDevelopment = process.env.NODE_ENV !== "production";
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
   { scheme: "app", privileges: { secure: true, standard: true } }
 ]);
-
-const formatBytes = bytes => {
-  var marker = 1024; // Change to 1000 if required
-  var decimal = 3; // Change as required
-  var kiloBytes = marker; // One Kilobyte is 1024 bytes
-  var megaBytes = marker * marker; // One MB is 1024 KB
-  var gigaBytes = marker * marker * marker; // One GB is 1024 MB
-
-  // return bytes if less than a KB
-  if (bytes < kiloBytes) return bytes + " Bytes";
-  // return KB if less than a MB
-  else if (bytes < megaBytes)
-    return (bytes / kiloBytes).toFixed(decimal) + " KB";
-  // return MB if less than a GB
-  else if (bytes < gigaBytes)
-    return (bytes / megaBytes).toFixed(decimal) + " MB";
-  // return GB if less than a TB
-  else return (bytes / gigaBytes).toFixed(decimal) + " GB";
-};
 
 async function createWindow() {
   // Create the browser window.
@@ -54,41 +37,8 @@ async function createWindow() {
     win.loadURL("app://./index.html");
   }
 
-  ipcMain.on("win-close", () => {
-    win.close();
-  });
-
-  ipcMain.on("win-maximize", () => {
-    if (win.isMaximized()) win.unmaximize();
-    else win.maximize();
-  });
-
-  ipcMain.on("win-minimize", () => {
-    win.minimize();
-  });
-
-  var popInterval;
-
-  ipcMain.on("start", () => {
-    popInterval = setInterval(() => {
-      win.webContents.send("label-req");
-      win.setAlwaysOnTop(true);
-      win.focus();
-      win.setAlwaysOnTop(false);
-    }, 5000);
-  });
-
-  ipcMain.on("stop", () => {
-    clearInterval(popInterval);
-  });
-
-  setInterval(() => {
-    const memory = process.memoryUsage();
-    win.webContents.send(
-      "ram",
-      formatBytes(memory.rss + memory.heapTotal + memory.external)
-    );
-  }, 1000);
+  updateStats(win);
+  initEventHandlers(win, ipcMain);
 }
 
 // Quit when all windows are closed.

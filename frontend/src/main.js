@@ -12,11 +12,19 @@ ipcRenderer.on("ram", (event, ram) => {
   ui_store.ram = ram;
 });
 
+ipcRenderer.on("cpu", (event, cpu) => {
+  ui_store.cpu = cpu;
+});
+
+ipcRenderer.on("disk", (event, disk) => {
+  ui_store.disk = disk;
+});
+
 ipcRenderer.on("route", (event, dest) => {
   router.push({ name: dest });
 });
 
-ipcRenderer.on("label-req", () => {
+ipcRenderer.on("request-label", () => {
   if (router.currentRoute.name !== "Label") router.push({ name: "Label" });
 });
 
@@ -28,14 +36,14 @@ const ui_store = {
   ram: "0 Bytes",
   disk: 300,
   settings: {
-    num_sessions: 1,
-    session_duration: 10,
-    label_frequency: 1,
-    db_path: "",
     use_camera: true,
     use_keyboard: true,
     use_mouse: true,
-    use_meta: true
+    use_meta: true,
+    num_sessions: 3600,
+    session_duration: 1,
+    label_frequency: 60,
+    db_path: ""
   }
 };
 
@@ -50,12 +58,24 @@ const ui_events = {
     ipcRenderer.send("win-minimize");
   },
   start: () => {
-    ipcRenderer.send("start");
+    ipcRenderer.send("to-backend", {
+      type: "run-core",
+      ...ui_store.settings
+    });
     ui_store.running = true;
   },
   stop: () => {
-    ipcRenderer.send("stop");
+    ipcRenderer.send("to-backend", {
+      type: "stop-core"
+    });
     ui_store.running = false;
+  },
+  label: label => {
+    ipcRenderer.send("to-backend", {
+      type: "label",
+      label
+    });
+    ui_store.mood = label.categorical;
   }
 };
 

@@ -50,6 +50,11 @@ export default {
       selected: null,
       uid: 0
     };
+  },
+  watch: {
+    selected: function() {
+      this.$emit("selected", this.selected);
+    }
   }
 };
 </script>

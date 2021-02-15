@@ -13,6 +13,7 @@ STOP_CORE = "stop-core"
 LABEL = "label"
 REQUEST_LABEL = "request-label"
 UNKNOWN = "unknown"
+CORE_FINISHED = "core-finished"
 
 
 def get_msg_from_type(msg):
@@ -65,5 +66,5 @@ def read_msg(msg):
     try:
         msg = json.loads(msg)
     except json.decoder.JSONDecodeError:
-        msg = {"type": "unknown"}
+        msg = {"type": "unknown", "msg": msg}
     return msg

@@ -1,14 +1,13 @@
 import os
-import logging
 import shutil
+import logging
+from src.AbsLogic import AbsLogic, default_core_callback
 
-from src.AbsBackend import AbsBackend
 
-
-class BackendStub(AbsBackend):
+class LogicStub(AbsLogic):
     def __init__(self, resources_path=""):
         shutil.rmtree(resources_path, ignore_errors=True)
-        super().__init__("", resources_path, "")
+        super().__init__("", resources_path, "", True)
         self.core_run = False
         self.label = None
 
@@ -27,8 +26,8 @@ class BackendStub(AbsBackend):
             pass  # create empty file
         logging.debug("finished downloading")
 
-    def run_core(self, request_label_func, num_sessions=0, session_duration=1, ask_freq=1,
-                 use_camera=True, use_mouse=True, use_kb=True, use_metadata=True):
+    def run_core(self, request_label_func, core_end_callback=default_core_callback,  num_sessions=0,
+                 session_duration=1, ask_freq=1, use_camera=True, use_mouse=True, use_kb=True, use_metadata=True):
         logging.debug("Core is started")
         self.core_run = True
 

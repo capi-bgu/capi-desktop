@@ -1,11 +1,13 @@
 import os
 import logging
+import time
+
 import requests
 import warnings
 from threading import Thread
 from oratio.Core import Core
-from src.AbsBackend import AbsBackend
 from src.NetworkLabeling import NetworkLabeling
+from src.AbsLogic import AbsLogic, default_core_callback
 from oratio.processing.MouseProcessor import MouseProcessor
 from oratio.collection.MouseCollector import MouseCollector
 from oratio.collection.CameraCollector import CameraCollector
@@ -24,10 +26,10 @@ from oratio.database.sqlite_db.KeyboardDataHandler import KeyboardDataHandler
 from oratio.database.sqlite_db.SessionMetaDataHandler import SessionMetaDataHandler
 
 
-class Backend(AbsBackend):
+class Logic(AbsLogic):
 
-    def __init__(self, out_path="", resources_path="", log_path=""):
-        super().__init__(out_path, resources_path, log_path)
+    def __init__(self, out_path="", resources_path="", log_path="", debug=False):
+        super().__init__(out_path, resources_path, log_path, debug)
 
     def download_face_model(self, url):
         self.__download_from_url(url, "face_detection.dat")
@@ -44,8 +46,8 @@ class Backend(AbsBackend):
                 f.write(model_data)
         logging.debug("finished downloading")
 
-    def run_core(self, request_label_func, num_sessions=0, session_duration=1, ask_freq=1,
-                 use_camera=True, use_mouse=True, use_kb=True, use_metadata=True):
+    def run_core(self, request_label_func, core_end_callback=default_core_callback, num_sessions=0,
+                 session_duration=1, ask_freq=1, use_camera=True, use_mouse=True, use_kb=True, use_metadata=True):
         if self.core_running():
             logging.warning("Can't run a working core")
             warnings.warn("Can't run a working core")
@@ -89,8 +91,13 @@ class Backend(AbsBackend):
 
         self.core = core
 
-        self.core_thread = Thread(target=self.core.run)
+        self.core_thread = Thread(target=self.__run_core, args=(core_end_callback,), name="core")
         self.core_thread.start()
+
+    def __run_core(self, callback):
+        self.core.run()
+        if self.core.finished:
+            callback()
 
     def stop_core(self):
         if self.core is None:
@@ -100,12 +107,21 @@ class Backend(AbsBackend):
             logging.warning("Can't stop non-running core")
             warnings.warn("Can't stop non-running core")
         else:
-            self.core.stop()
-            self.core_thread.join()
-            self.core_thread = None
+            Thread(target=self.__stop_core, name="stop_core").start()
+
+    def __stop_core(self):
+        logging.debug("stopping core....")
+        self.labeler.stop_labeling()
+        self.core.stop()
+        self.core_thread.join()
+        self.core_thread = None
+        logging.debug("core stopped")
 
     def set_label(self, label):
-        self.labeler.set_label(label)
+        if self.core_running():
+            self.labeler.set_label(label)
+        else:
+            logging.error("Can't receive label before run the core")
 
     def core_running(self):
         return self.core is not None and self.core.running and \

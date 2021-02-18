@@ -7,8 +7,8 @@ from tests.stubs.GuiStub import GuiStub
 
 
 class GuiDummy(unittest.TestCase):
-    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s: %(message)s',
-                        datefmt='%m/%d/%Y %I:%M:%S %p')
+    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s.%(msecs)03d - %(levelname)s: %(message)s',
+                        datefmt='%m/%d/%Y %H:%M:%S')
 
     def setUp(self):
         self.test_path = str(pathlib.Path(__file__).parent.absolute())

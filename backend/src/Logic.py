@@ -53,30 +53,31 @@ class Logic(AbsLogic):
             warnings.warn("Can't run a working core")
             return
 
-        camera_gatherer = {
-            CameraCollector(fps=2, camera=0): {CameraProcessor(self.resources_path): [CameraDataHandler(self.out_path)]}
-        }
-        mouse_gatherer = {
-            KeyboardCollector(): {KeyboardProcessor(): [KeyboardDataHandler(self.out_path)],
-                                  IdentityProcessor(): [RawDataHandler("KeyboardRawData", self.out_path)]}
-        }
-        kb_gatherer = {
-            MouseCollector(): {MouseProcessor(): [MouseDataHandler(self.out_path)],
-                               IdentityProcessor(): [RawDataHandler("MouseRawData", self.out_path)]}
-        }
-        metadata_gatherer = {
-            SessionMetaCollector(): {SessionMetaProcessor(self.resources_path): [SessionMetaDataHandler(self.out_path)],
-                                     IdentityProcessor(): [RawDataHandler("MetaRawData", self.out_path)]}
-        }
-
         data_gatherers = {}
         if use_camera:
+            camera_gatherer = {
+                CameraCollector(fps=2, camera=0): {
+                    CameraProcessor(self.resources_path): [CameraDataHandler(self.out_path)]}
+            }
             data_gatherers.update(camera_gatherer)
         if use_mouse:
+            mouse_gatherer = {
+                KeyboardCollector(): {KeyboardProcessor(): [KeyboardDataHandler(self.out_path)],
+                                      IdentityProcessor(): [RawDataHandler("KeyboardRawData", self.out_path)]}
+            }
             data_gatherers.update(mouse_gatherer)
         if use_kb:
+            kb_gatherer = {
+                MouseCollector(): {MouseProcessor(): [MouseDataHandler(self.out_path)],
+                                   IdentityProcessor(): [RawDataHandler("MouseRawData", self.out_path)]}
+            }
             data_gatherers.update(kb_gatherer)
         if use_metadata:
+            metadata_gatherer = {
+                SessionMetaCollector(): {
+                    SessionMetaProcessor(self.resources_path): [SessionMetaDataHandler(self.out_path)],
+                    IdentityProcessor(): [RawDataHandler("MetaRawData", self.out_path)]}
+            }
             data_gatherers.update(metadata_gatherer)
 
         self.labeler = NetworkLabeling(request_label_func)

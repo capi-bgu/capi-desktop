@@ -1,5 +1,4 @@
 import time
-import logging
 from oratio.labeling.labeling_method.LabelMethod import LabelMethod
 
 

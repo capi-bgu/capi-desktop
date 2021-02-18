@@ -1,5 +1,3 @@
-import threading
-
 import typer
 from src.Logic import Logic
 from src.Communication import Communication

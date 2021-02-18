@@ -35,13 +35,12 @@ class AbsLogic(ABC):
         if not os.path.isdir(self.log_path):
             os.mkdir(self.log_path)
 
-        if not debug:
-            logging.basicConfig(level=logging.DEBUG, filename=os.path.join(self.log_path, "capi-run.log"),
-                                format='%(asctime)s.%(msecs)03d - %(levelname)s: %(message)s',
-                                datefmt='%m/%d/%Y %H:%M:%S')
-        else:
-            logging.basicConfig(level=logging.DEBUG, format='%(asctime)s.%(msecs)03d - %(levelname)s: %(message)s',
-                                datefmt='%m/%d/%Y %H:%M:%S')
+        logging.basicConfig(level=logging.INFO, filename=os.path.join(self.log_path, "capi-run.log"),
+                            format='%(asctime)s.%(msecs)03d - %(levelname)s: %(message)s',
+                            datefmt='%m/%d/%Y %H:%M:%S')
+        if debug:
+            logging.getLogger().addHandler(logging.StreamHandler())
+            logging.getLogger().setLevel(logging.DEBUG)
 
     @abstractmethod
     def download_face_model(self, url):

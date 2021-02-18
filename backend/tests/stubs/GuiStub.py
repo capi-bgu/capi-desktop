@@ -18,18 +18,18 @@ class GuiStub:
 
     def connect_to_backend(self):
         self.sock.connect((self.host, self.port))
-        logging.debug("connected to Communication")
+        logging.info("connected to Communication")
         self.listener.start()
 
     def listen(self):
-        logging.debug("ui started to listen")
+        logging.info("ui started to listen")
         while self.running:
             try:
                 request = self.sock.recv(1024)
             except socket.timeout:
                 continue
             if not request:
-                logging.debug("backend disconnected")
+                logging.info("backend disconnected")
                 break
             request = GuiRequests.read_msg(request)
             if request["type"] == GuiRequests.REQUEST_LABEL:
@@ -40,7 +40,7 @@ class GuiStub:
                 self.core_finished = True
 
     def close_gui(self):
-        logging.debug("closing gui")
+        logging.info("closing gui")
         self.sock.send(GuiRequests.build_pack_type(GuiRequests.CLOSE_CONN))
         self.running = False
         self.listener.join()
@@ -48,11 +48,11 @@ class GuiStub:
 
     def download_face_model(self, url=GuiRequests.DLIB_FACE_MODEL_URL):
         self.sock.send(GuiRequests.build_download_model_msg(url))
-        logging.debug("I sent download model msg")
+        logging.info("I sent download model msg")
 
     def download_task_keywords(self, url=GuiRequests.TASK_KEYWORDS_URL):
         self.sock.send(GuiRequests.build_download_task_keywords_msg(url))
-        logging.debug("I sent download model msg")
+        logging.info("I sent download model msg")
 
     def run_core(self, out_path, num_sessions, session_duration, ask_freq,
                  use_camera, use_mouse, use_kb, use_metadata):

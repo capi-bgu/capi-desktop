@@ -1,7 +1,5 @@
 import os
 import logging
-import time
-
 import requests
 import warnings
 from threading import Thread
@@ -38,13 +36,13 @@ class Logic(AbsLogic):
         self.__download_from_url(url, "task_keywords.json")
 
     def __download_from_url(self, url, file_name):
-        logging.debug(f'downloading {file_name}....')
+        logging.info(f'downloading {file_name}....')
         model_file_path = os.path.join(self.resources_path, file_name)
         if not os.path.isfile(model_file_path):
             with open(model_file_path, 'wb') as f:
                 model_data = requests.get(url).content
                 f.write(model_data)
-        logging.debug("finished downloading")
+        logging.info("finished downloading")
 
     def run_core(self, request_label_func, core_end_callback=default_core_callback, num_sessions=0,
                  session_duration=1, ask_freq=1, use_camera=True, use_mouse=True, use_kb=True, use_metadata=True):
@@ -111,12 +109,12 @@ class Logic(AbsLogic):
             Thread(target=self.__stop_core, name="stop_core").start()
 
     def __stop_core(self):
-        logging.debug("stopping core....")
+        logging.info("stopping core....")
         self.labeler.stop_labeling()
         self.core.stop()
         self.core_thread.join()
         self.core_thread = None
-        logging.debug("core stopped")
+        logging.info("core stopped")
 
     def set_label(self, label):
         if self.core_running():

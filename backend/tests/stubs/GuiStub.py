@@ -34,7 +34,7 @@ class GuiStub:
             request = GuiRequests.read_msg(request)
             if request["type"] == GuiRequests.REQUEST_LABEL:
                 time.sleep(2)
-                label = {"categorical": 5, "VAD": {"Valance": 2, "Arousal": -3, "Dominance": 4}}
+                label = {"categorical": 9, "VAD": {"Valance": 9, "Arousal": 9, "Dominance": 9}}
                 self.send_label(label)
             if request["type"] == GuiRequests.CORE_FINISHED:
                 self.core_finished = True

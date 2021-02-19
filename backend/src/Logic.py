@@ -119,6 +119,7 @@ class Logic(AbsLogic):
     def set_label(self, label):
         if self.core_running():
             self.labeler.set_label(label)
+            self.core.label_manager.label = label
         else:
             logging.error("Can't receive label before run the core")
 

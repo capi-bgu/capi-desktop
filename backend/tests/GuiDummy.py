@@ -51,6 +51,15 @@ class GuiDummy(unittest.TestCase):
     def test_receive_label(self):
         self.gui_stub.send_label({"test": 0})
         time.sleep(1)
+
+        self.gui_stub.run_core(out_path=self.test_path, num_sessions=15, session_duration=1, ask_freq=10,
+                               use_camera=False, use_mouse=True, use_kb=True, use_metadata=False)
+
+        time.sleep(7)
+        self.gui_stub.send_label({"test": 0})
+
+        while not self.gui_stub.core_finished:
+            time.sleep(0.001)
         self.gui_stub.close_gui()
 
 

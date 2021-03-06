@@ -1,11 +1,25 @@
 "use strict";
 
-import { app, protocol, BrowserWindow, ipcMain } from "electron";
+import { app, protocol, BrowserWindow } from "electron";
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
 import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
+import { join, dirname } from "path";
+import { exec } from "child_process";
 import { updateStats } from "./background/systemStats";
 import { initEventHandlers } from "./background/eventHandler";
 const isDevelopment = process.env.NODE_ENV !== "production";
+
+let exeDir = dirname(app.getPath("exe"));
+
+if (process.env.WEBPACK_DEV_SERVER_URL) {
+  console.log("this is dev mode");
+  exeDir = __dirname;
+}
+
+const backendPath = join(exeDir, "Backend", "Backend.exe");
+const resourcePath = join(exeDir, "resources");
+const outPath = join(exeDir, "output");
+const dbPath = join(outPath, "capi_client.db");
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
@@ -37,8 +51,20 @@ async function createWindow() {
     win.loadURL("app://./index.html");
   }
 
-  updateStats(win);
-  initEventHandlers(win, ipcMain);
+  const backendProcess = exec(
+    `${backendPath} -d -rp ${resourcePath} -op ${outPath}`,
+    (error, stdout, stderr) => {
+      if (error) {
+        console.error(`exec error: ${error}`);
+        return;
+      }
+      console.log(`stdout: ${stdout}`);
+      console.error(`stderr: ${stderr}`);
+    }
+  );
+
+  updateStats(win, [backendProcess.pid, process.pid], dbPath);
+  initEventHandlers(win);
 }
 
 // Quit when all windows are closed.

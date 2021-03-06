@@ -1,5 +1,5 @@
-import { pidusage } from "pidusage";
-import { statSync } from "fs";
+import pidusage from "pidusage";
+import { promises as fs } from "fs";
 
 const formatBytes = bytes => {
   const marker = 1024; // Change to 1000 if required
@@ -22,9 +22,9 @@ const formatBytes = bytes => {
 
 const updateStats = (window, process_ids, db_path) => {
   setTimeout(() => {
-    compute(process_ids, stats => {
-      window.webContents.send("cpu", stats.cpu);
-      window.webContents.send("memory", formatBytes(stats.memory));
+    compute(process_ids, db_path, stats => {
+      window.webContents.send("cpu", stats.cpu.toFixed(2));
+      window.webContents.send("ram", formatBytes(stats.memory));
       window.webContents.send("disk", formatBytes(stats.disk));
       updateStats(window, process_ids, db_path);
     });
@@ -33,17 +33,26 @@ const updateStats = (window, process_ids, db_path) => {
 
 const compute = (process_ids, db_path, callback) => {
   pidusage(process_ids, (err, stats) => {
+    stats = Object.values(stats);
     const sum_stats = sum_process_stats(stats);
-    sum_stats.disk = statSync(db_path).size;
-    callback(sum_stats);
+    sum_stats.disk = 0;
+    fs.stat(db_path)
+      .then(fileStats => {
+        sum_stats.disk = fileStats.size;
+      })
+      .then(() => callback(sum_stats))
+      .catch(() => {
+        callback(sum_stats);
+      });
   });
 };
 
 const sum_process_stats = stats => {
-  stats.reduce(
+  return stats.reduce(
     (total, elem) => {
       total.cpu += elem.cpu;
       total.memory += elem.memory;
+      return total;
     },
     { cpu: 0, memory: 0 }
   );

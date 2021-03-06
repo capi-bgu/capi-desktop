@@ -14,6 +14,7 @@
         :id="`${item.value}&${uid}`"
         :value="item.value"
         v-model="selected"
+        @click="onSelect(item.value)"
         required
       />
       <label
@@ -43,16 +44,23 @@ export default {
     cuid += 1;
   },
   props: {
-    values: Array
+    values: Array,
+    preSelected: { required: false }
   },
   data() {
     return {
-      selected: null,
+      selected: undefined,
       uid: 0
     };
   },
-  watch: {
-    selected: function() {
+  mounted() {
+    this.selected = this.preSelected;
+  },
+  methods: {
+    onSelect: function(selection) {
+      if (this.selected === selection) this.selected = "none";
+      else this.selected = selection;
+
       this.$emit("selected", this.selected);
     }
   }

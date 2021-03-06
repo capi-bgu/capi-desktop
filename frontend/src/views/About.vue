@@ -101,6 +101,8 @@
 <script>
 import Card from "@/components/Card.vue";
 
+//TODO: improve definitions of labels.
+
 export default {
   name: "About",
   components: {

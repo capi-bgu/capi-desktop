@@ -8,6 +8,10 @@ import "@fortawesome/fontawesome-free/js/all.js";
 const electron = require("electron");
 const { ipcRenderer } = electron;
 
+ipcRenderer.on("ready", () => {
+  ui_store.ready = true;
+});
+
 ipcRenderer.on("ram", (event, ram) => {
   ui_store.ram = ram;
 });
@@ -20,21 +24,25 @@ ipcRenderer.on("disk", (event, disk) => {
   ui_store.disk = disk;
 });
 
-ipcRenderer.on("route", (event, dest) => {
-  router.push({ name: dest });
-});
-
 ipcRenderer.on("request-label", () => {
   if (router.currentRoute.name !== "Label") router.push({ name: "Label" });
+  ui_store.scheduledLabel = true;
 });
 
 const ui_store = {
+  ready: false,
   running: false,
   start_time: Date.now(),
-  mood: "Happy",
-  cpu: 20,
+  lastMood: "Happy",
+  mood: "none",
+  valance: "none",
+  arousal: "none",
+  dominance: "none",
+  cpu: NaN,
   ram: "0 Bytes",
-  disk: 300,
+  disk: NaN,
+  lastScheduledLabel: Date.now(),
+  scheduledLabel: false,
   settings: {
     use_camera: true,
     use_keyboard: true,
@@ -48,6 +56,10 @@ const ui_store = {
 };
 
 const ui_events = {
+  callbacks: {
+    onStart: new Map(),
+    onStop: new Map()
+  },
   window_close: () => {
     ipcRenderer.send("win-close");
   },
@@ -60,22 +72,49 @@ const ui_events = {
   start: () => {
     ipcRenderer.send("to-backend", {
       type: "run-core",
-      ...ui_store.settings
+      num_sessions: ui_store.settings.num_sessions,
+      session_duration: ui_store.settings.session_duration,
+      ask_freq: ui_store.settings.label_frequency,
+      use_camera: ui_store.settings.use_camera,
+      use_kb: ui_store.settings.use_keyboard,
+      use_mouse: ui_store.settings.use_mouse,
+      use_metadata: ui_store.settings.use_meta
     });
     ui_store.running = true;
+    ui_store.start_time = Date.now();
+    ui_events.callbacks.onStart.forEach(callback => callback());
   },
   stop: () => {
     ipcRenderer.send("to-backend", {
       type: "stop-core"
     });
     ui_store.running = false;
+    ui_events.callbacks.onStop.forEach(callback => callback());
   },
-  label: label => {
+  label: () => {
     ipcRenderer.send("to-backend", {
       type: "label",
-      label
+      label: {
+        categorical: ui_store.mood,
+        VAD: {
+          valance: ui_store.valance,
+          arousal: ui_store.arousal,
+          dominance: ui_store.dominance
+        }
+      }
     });
-    ui_store.mood = label.categorical;
+    ui_store.lastMood = ui_store.mood;
+    if (ui_store.scheduledLabel) ui_store.lastScheduledLabel = Date.now();
+    ui_store.scheduledLabel = false;
+  },
+  notification: content => {
+    ipcRenderer.send("notification", content);
+  },
+  onStart(id, callback) {
+    ui_events.callbacks.onStart.set(id, callback);
+  },
+  onStop(id, callback) {
+    ui_events.callbacks.onStop.set(id, callback);
   }
 };
 

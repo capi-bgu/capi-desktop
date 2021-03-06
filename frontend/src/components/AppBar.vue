@@ -5,11 +5,13 @@
       v-on:click="indicator_click"
       class="indicator"
       :class="{
-        'bg-blue-500 hover:bg-green-400': !running,
-        'bg-green-400 hover:bg-red-500': running
+        'bg-gray-500': !$root.store.ready,
+        'bg-blue-500 hover:bg-green-400': !running && $root.store.ready,
+        'bg-green-400 hover:bg-red-500': running && $root.store.ready
       }"
     >
-      <span v-if="!running">Start</span>
+      <span v-if="!$root.store.ready">Loading...</span>
+      <span v-else-if="!running">Start</span>
       <span v-else>Stop</span>
     </button>
   </div>
@@ -23,6 +25,8 @@ export default {
   },
   methods: {
     indicator_click: function() {
+      if (!this.$root.store.ready) return;
+
       if (this.running) this.$root.events.stop();
       else this.$root.events.start();
     }

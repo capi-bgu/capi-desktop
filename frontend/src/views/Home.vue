@@ -130,10 +130,11 @@ export default {
         this.$root.events.notification({
           title: "Submit Label",
           subtitle: "Please Tell Us How You Feel",
-          body: `In ${notificationInterval} seconds you will be prompted with the CAPI app to fill in a form in order to label your current emotional state.`
+          body: `In a few seconds you will be prompted with the CAPI app to fill in a form in order to label your current emotional state.`
         });
 
-      this.nextLabel = `${Math.floor(ttl / 60)}:${ttl % 60}`;
+      if (ttl <= 0) this.nextLabel = "In a Moment";
+      else this.nextLabel = `${Math.floor(ttl / 60)}:${ttl % 60}`;
     }
   }
 };

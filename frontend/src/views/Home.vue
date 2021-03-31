@@ -118,10 +118,7 @@ export default {
         this.$root.store.settings.label_frequency *
         this.$root.store.settings.session_duration;
 
-      const notificationInterval = Math.min(
-        Math.max(30, labelInterval * 0.1),
-        2 * 60
-      );
+      const notificationInterval = 5;
 
       const ttl =
         labelInterval -

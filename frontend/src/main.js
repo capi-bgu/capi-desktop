@@ -48,7 +48,7 @@ const ui_store = {
     use_keyboard: true,
     use_mouse: true,
     use_meta: true,
-    num_sessions: 3600,
+    num_sessions: -1,
     session_duration: 1,
     label_frequency: 60,
     db_path: ""

@@ -50,7 +50,7 @@
           <input
             class="s-number s-focus"
             type="number"
-            min="1"
+            min="-1"
             id="num_sessions"
             v-model.number="$root.store.settings.num_sessions"
           />
